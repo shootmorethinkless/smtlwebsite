@@ -1079,12 +1079,11 @@
             // Initialize OpenSeadragon viewer
             viewer = OpenSeadragon({
                 id: "openseadragon-viewer",
-                prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/images/",
-                tileSources: {
-                    type: 'image',
-                    url: highResUrl,
-                    crossOriginPolicy: 'Anonymous'
-                },
+                    prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/images/",
+                    tileSources: "path/to/your-image.dzi", // Point to the DZI file
+                    // Other options remain the same
+                        });inPolicy: 'Anonymous'
+                    },
                 showNavigationControl: true,
                 navigatorPosition: "BOTTOM_RIGHT",
                 zoomInButton: "zoomIn",
