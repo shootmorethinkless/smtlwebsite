@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyVision | Premium Drone Services</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- OpenSeadragon Library -->
+    <script src="https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/openseadragon.min.js"></script>
+    <style>
+        :root {
+            --primary: #0cdbff;
+            --secondary: #1C1C1C;
+            --background: #0d0d0d;
+            --text: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+        
+        body.modal-open {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        
+        /* Header & Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(13, 13, 13, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo span {
+            color: var(--primary);
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 30px;
+        }
+        
+        nav ul li a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            position: relative;
+            padding-bottom: 5px;
+            transition: var(--transition);
+        }
+        
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+        
+        nav ul li a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary);
+            transition: var(--transition);
+        }
+        
+        nav ul li a:hover::after {
+            width: 100%;
+        }
+        
+        .active::after {
+            width: 100%;
+        }
+        
+        .active {
+            color: var(--primary);
+        }
+        
+        .mobile-nav-toggle {
+            display: none;
+        }
+        
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            background: linear-gradient(0deg, rgba(13, 13, 13, 0.7), rgba(13, 13, 13, 0.7)), url('/api/placeholder/1920/1080') no-repeat center center;
+            background-size: cover;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-content {
+            max-width: 800px;
+            z-index: 10;
+            animation: fadeIn 1s ease-in-out;
+        }
+        
+        .hero h1 {
+            font-size: 60px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+        
+        .hero h1 span {
+            color: var(--primary);
+        }
+        
+        .hero p {
+            font-size: 18px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            max-width: 600px;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: #000;
+            padding: 15px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: #05b6d4;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(12, 219, 255, 0.2);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            margin-left: 15px;
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: #000;
+        }
+        
+        /* Content Sections */
+        section {
+            padding: 100px 0;
+            position: relative;
+        }
+        
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 50px;
+            text-align: center;
+            letter-spacing: -0.5px;
+        }
+        
+        .section-title span {
+            color: var(--primary);
+        }
+        
+        /* Tabs */
+        .tabs {
+            padding-top: 100px;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Mapping Section */
+        .map-container {
+            position: relative;
+            margin-bottom: 40px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .map-image {
+            width: 100%;
+            height: 600px;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            transform-origin: center;
+            cursor: zoom-in;
+        }
+        
+        .map-container.zoomed .map-image {
+            transform: scale(2);
+            cursor: zoom-out;
+        }
+        
+        .zoom-indicator {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+        
+        .zoom-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .map-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        .map-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .map-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .map-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+        
+        .map-item img.zoomable-img {
+            cursor: zoom-in;
+        }
+        
+        .map-item-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.8), transparent);
+        }
+        
+        .map-item-caption h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .map-item-caption p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        /* Photography Section */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .photo-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .photo-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        
+        .photo-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .photo-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0.8), transparent);
+            transform: translateY(100%);
+            transition: var(--transition);
+        }
+        
+        .photo-item:hover .photo-caption {
+            transform: translateY(0);
+        }
+        
+        .photo-caption h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .photo-caption p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        /* Videography Section */
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+        
+        .video-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .video-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .video-thumbnail {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+        
+        .video-item:hover .video-thumbnail {
+            opacity: 0.7;
+        }
+        
+        .video-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0.8;
+            transition: var(--transition);
+        }
+        
+        .video-play::after {
+            content: '';
+            border-left: 15px solid #000;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            margin-left: 5px;
+        }
+        
+        .video-item:hover .video-play {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+        
+        .video-info {
+            padding: 15px;
+            background-color: var(--secondary);
+        }
+        
+        .video-info h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .video-info p {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .video-tag {
+            display: inline-block;
+            background-color: rgba(12, 219, 255, 0.1);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        
+        /* Image Viewer Modal */
+        .image-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            padding: 50px;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .image-modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+        }
+        
+        .modal-content {
+            position: relative;
+            width: 90%;
+            height: 80%;
+            margin: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .openseadragon-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #111;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        
+        .loading-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            z-index: 2002;
+            display: none;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 30px;
+            color: white;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 2001;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--secondary);
+            padding: 50px 0 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+        
+        .footer-logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        
+        .footer-logo span {
+            color: var(--primary);
+        }
+        
+        .footer-about p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .social-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            color: var(--text);
+            transition: var(--transition);
+        }
+        
+        .social-link:hover {
+            background-color: var(--primary);
+            color: #000;
+            transform: translateY(-3px);
+        }
+        
+        .footer-heading {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text);
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            color: var(--text-secondary);
+        }
+        
+        .contact-icon {
+            margin-right: 10px;
+            color: var(--primary);
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .hero h1 {
+                font-size: 48px;
+            }
+            
+            .map-image {
+                height: 450px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 36px;
+            }
+            
+            nav ul {
+                display: none;
+                position: absolute;
+                top: 80px;
+                left: 0;
+                width: 100%;
+                background-color: var(--secondary);
+                flex-direction: column;
+                padding: 20px 0;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            }
+            
+            nav ul.show {
+                display: flex;
+            }
+            
+            nav ul li {
+                margin: 0;
+                text-align: center;
+                padding: 12px 0;
+            }
+            
+            .mobile-nav-toggle {
+                display: block;
+                background: none;
+                border: none;
+                color: var(--text);
+                font-size: 24px;
+                cursor: pointer;
+            }
+            
+            .photo-grid, .video-grid, .map-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+            
+            .modal-content {
+                max-width: 95%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+            
+            .hero p {
+                font-size: 16px;
+            }
+            
+            .btn {
+                display: block;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+            
+            .btn-outline {
+                margin-left: 0;
+            }
+            
+            .section-title {
+                font-size: 28px;
+            }
+            
+            .photo-grid, .video-grid, .map-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .map-image {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="header-inner">
+                <a href="#" class="logo">Sky<span>Vision</span></a>
+                <button class="mobile-nav-toggle">☰</button>
+                <nav>
+                    <ul>
+                        <li><a href="#" class="active">Home</a></li>
+                        <li><a href="#mapping">Mapping</a></li>
+                        <li><a href="#photography">Photography</a></li>
+                        <li><a href="#videography">Videography</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Capture the World from <span>Above</span></h1>
+                <p>Premium drone services for mapping, photography, and videography. We bring cutting-edge technology and artistic vision to every project.</p>
+                <a href="#mapping" class="btn">Explore Services</a>
+                <a href="#contact" class="btn btn-outline">Contact Us</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mapping Section -->
+    <section id="mapping" class="tabs">
+        <div class="container">
+            <h2 class="section-title">Precision <span>Mapping</span></h2>
+            
+            <div class="tab-content active">
+                <div class="map-container">
+                    <img src="/api/placeholder/1200/800" alt="Aerial Map" class="map-image">
+                    <div class="zoom-indicator">
+                        <svg class="zoom-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            <line x1="11" y1="8" x2="11" y2="14"></line>
+                            <line x1="8" y1="11" x2="14" y2="11"></line>
+                        </svg>
+                        Click to Zoom
+                    </div>
+                </div>
+                
+                <div class="map-grid">
+                    <div class="map-item">
+                        <img src="/api/placeholder/400/300" alt="Topographic Map" class="zoomable-img" data-zoomable="true">
+                        <div class="map-item-caption">
+                            <h3>Topographic Mapping</h3>
+                            <p>High-precision terrain visualization</p>
+                        </div>
+                    </div>
+                    <div class="map-item">
+                        <img src="/api/placeholder/400/300" alt="3D Reconstruction" class="not-zoomable">
+                        <div class="map-item-caption">
+                            <h3>3D Reconstructions</h3>
+                            <p>Accurate digital twins of real-world environments</p>
+                        </div>
+                    </div>
+                    <div class="map-item">
+                        <img src="/api/placeholder/400/300" alt="Orthomosaic Map" class="zoomable-img" data-zoomable="true" data-high-res="https://drive.google.com/uc?export=view&id=16Dr8McHuuWyKZYPul59cN7dWHUpB3PIX">
+                        <div class="map-item-caption">
+                            <h3>Orthomosaic Maps</h3>
+                            <p>Geometrically corrected aerial imagery</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Photography Section -->
+    <section id="photography" class="tabs">
+        <div class="container">
+            <h2 class="section-title">Stunning <span>Photography</span></h2>
+            
+            <div class="tab-content active">
+                <div class="photo-grid">
+                    <div class="photo-item">
+                        <img src="/api/placeholder/500/500" alt="Aerial Urban Photography" class="not-zoomable">
+                        <div class="photo-caption">
+                            <h3>Urban Landscapes</h3>
+                            <p>Capturing city skylines from breathtaking angles</p>
+                        </div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="/api/placeholder/500/500" alt="Aerial Nature Photography" class="not-zoomable">
+                        <div class="photo-caption">
+                            <h3>Natural Wonders</h3>
+                            <p>Revealing the beauty of natural landscapes</p>
+                        </div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="/api/placeholder/500/500" alt="Aerial Architecture Photography" class="not-zoomable">
+                        <div class="photo-caption">
+                            <h3>Architectural Marvels</h3>
+                            <p>Showcasing design excellence from above</p>
+                        </div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="/api/placeholder/500/500" alt="Aerial Event Photography" class="not-zoomable">
+                        <div class="photo-caption">
+                            <h3>Event Documentation</h3>
+                            <p>Capturing special moments from a unique perspective</p>
+                        </div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="/api/placeholder/500/500" alt="Aerial Real Estate Photography" class="not-zoomable">
+                        <div class="photo-caption">
+                            <h3>Real Estate</h3>
+                            <p>Highlighting property features with aerial imagery</p>
+                        </div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="/api/placeholder/500/500" alt="Aerial Coastal Photography" class="not-zoomable">
+                        <div class="photo-caption">
+                            <h3>Coastal Scenes</h3>
+                            <p>Documenting the meeting of land and sea</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Videography Section -->
+    <section id="videography" class="tabs">
+        <div class="container">
+            <h2 class="section-title">Cinematic <span>Videography</span></h2>
+            
+            <div class="tab-content active">
+                <div class="video-grid">
+                    <div class="video-item">
+                        <img src="/api/placeholder/400/250" alt="Cinematic Drone Video" class="video-thumbnail not-zoomable">
+                        <div class="video-play"></div>
+                        <div class="video-info">
+                            <h3>Cinematic Landscapes</h3>
+                            <p>Breathtaking flyovers of scenic terrains</p>
+                            <span class="video-tag">Cinematic</span>
+                        </div>
+                    </div>
+                    <div class="video-item">
+                        <img src="/api/placeholder/400/250" alt="Property Showcase Video" class="video-thumbnail not-zoomable">
+                        <div class="video-play"></div>
+                        <div class="video-info">
+                            <h3>Property Showcase</h3>
+                            <p>Comprehensive aerial property tours</p>
+                            <span class="video-tag">Real Estate</span>
+                        </div>
+                    </div>
+                    <div class="video-item">
+                        <img src="/api/placeholder/400/250" alt="Event Coverage Video" class="video-thumbnail not-zoomable">
+                        <div class="video-play"></div>
+                        <div class="video-info">
+                            <h3>Event Coverage</h3>
+                            <p>Dynamic footage of live events</p>
+                            <span class="video-tag">Documentary</span>
+                        </div>
+                    </div>
+                    <div class="video-item">
+                        <img src="/api/placeholder/400/250" alt="Corporate Video" class="video-thumbnail not-zoomable">
+                        <div class="video-play"></div>
+                        <div class="video-info">
+                            <h3>Corporate Film</h3>
+                            <p>Professional aerial footage for businesses</p>
+                            <span class="video-tag">Commercial</span>
+                        </div>
+                    </div>
+                    <div class="video-item">
+                        <img src="/api/placeholder/400/250" alt="Travel Video" class="video-thumbnail not-zoomable">
+                        <div class="video-play"></div>
+                        <div class="video-info">
+                            <h3>Travel Stories</h3>
+                            <p>Immersive aerial journeys</p>
+                            <span class="video-tag">Travel</span>
+                        </div>
+                    </div>
+                    <div class="video-item">
+                        <img src="/api/placeholder/400/250" alt="Construction Progress Video" class="video-thumbnail not-zoomable">
+                        <div class="video-play"></div>
+                        <div class="video-info">
+                            <h3>Construction Progress</h3>
+                            <p>Time-lapse documentation of building projects</p>
+                            <span class="video-tag">Construction</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Image Modal -->
+    <div class="image-modal" id="imageModal">
+        <button class="close-modal" id="closeModal">×</button>
+        <div class="modal-content">
+            <div class="loading-indicator" id="loadingIndicator">Loading high-resolution image...</div>
+            <div id="openseadragon-viewer" class="openseadragon-container"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <a href="#" class="footer-logo">Sky<span>Vision</span></a>
+                    <p>Premium drone services for mapping, photography, and videography. We bring cutting-edge technology and artistic vision to every project.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                                <rect x="2" y="9" width="4" height="12"></rect>
+                                <circle cx="4" cy="4" r="2"></circle>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="footer-links-container">
+                    <h3 class="footer-heading">Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Home</a></li>
+                        <li><a href="#mapping">Mapping</a></li>
+                        <li><a href="#photography">Photography</a></li>
+                        <li><a href="#videography">Videography</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links-container">
+                    <h3 class="footer-heading">Services</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Aerial Mapping</a></li>
+                        <li><a href="#">3D Modeling</a></li>
+                        <li><a href="#">Drone Photography</a></li>
+                        <li><a href="#">Aerial Videography</a></li>
+                        <li><a href="#">Real Estate Tours</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h3 class="footer-heading">Contact Us</h3>
+                    <div class="contact-item">
+                        <span class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                        </span>
+                        <span>123 Drone Avenue, Sky City, SC 12345</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                                <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                        </span>
+                        <span>info@skyvision.com</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </span>
+                        <span>(123) 456-7890</span>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 SkyVision. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Navigation Toggle
+        document.querySelector('.mobile-nav-toggle').addEventListener('click', function() {
+            document.querySelector('nav ul').classList.toggle('show');
+        });
+
+        // OpenSeadragon Viewer
+        let viewer = null;
+
+        // Open modal only for zoomable images
+        document.querySelectorAll('img[data-zoomable="true"]').forEach(img => {
+            img.addEventListener('click', function() {
+                openImageModal(this);
+            });
+        });
+        
+        function openImageModal(imgElement) {
+            // Show modal
+            const modal = document.getElementById('imageModal');
+            modal.classList.add('show');
+            document.body.classList.add('modal-open');
+            
+            // Show loading indicator
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.style.display = 'block';
+            
+            // Get high-resolution image URL if available, otherwise use the regular image
+            const highResUrl = imgElement.getAttribute('data-high-res') || imgElement.src;
+            console.log("Loading image:", highResUrl);
+            
+            // If viewer already exists, destroy it first
+            if (viewer) {
+                viewer.destroy();
+                viewer = null;
+            }
+            
+            // Initialize OpenSeadragon viewer
+            viewer = OpenSeadragon({
+                id: "openseadragon-viewer",
+                prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@3.1.0/build/openseadragon/images/",
+                tileSources: {
+                    type: 'image',
+                    url: highResUrl,
+                    crossOriginPolicy: 'Anonymous'
+                },
+                showNavigationControl: true,
+                navigatorPosition: "BOTTOM_RIGHT",
+                zoomInButton: "zoomIn",
+                zoomOutButton: "zoomOut",
+                homeButton: "resetZoom",
+                maxZoomPixelRatio: 10,
+                minZoomImageRatio: 0.5,
+                defaultZoomLevel: 0,
+                visibilityRatio: 0.1,
+                constrainDuringPan: false,
+                animationTime: 0.5,
+                blendTime: 0.1,
+                springStiffness: 10,
+                immediateRender: true
+            });
+            
+            // Hide loading indicator when image is loaded
+            viewer.addHandler('open', function() {
+                loadingIndicator.style.display = 'none';
+            });
+            
+            // Handle errors
+            viewer.addHandler('open-failed', function(event) {
+                console.error("Failed to load image:", highResUrl);
+                loadingIndicator.textContent = "Error loading high-res image. Trying original...";
+                
+                // Try loading the original image as fallback
+                if (highResUrl !== imgElement.src) {
+                    viewer.open({
+                        type: 'image',
+                        url: imgElement.src
+                    });
+                } else {
+                    loadingIndicator.textContent = "Error loading image";
+                    setTimeout(() => {
+                        loadingIndicator.style.display = 'none';
+                    }, 2000);
+                }
+            });
+        }
+        
+        // Close modal
+        document.getElementById('closeModal').addEventListener('click', function() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('show');
+            document.body.classList.remove('modal-open');
+            
+            // Destroy viewer when modal is closed to free up resources
+            if (viewer) {
+                viewer.destroy();
+                viewer = null;
+            }
+        });
+        
+        // Close modal when clicking outside the image
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+                document.body.classList.remove('modal-open');
+                
+                // Destroy viewer when modal is closed
+                if (viewer) {
+                    viewer.destroy();
+                    viewer = null;
+                }
+            }
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            const modal = document.getElementById('imageModal');
+            if (!modal.classList.contains('show')) return;
+            
+            if (e.key === 'Escape') {
+                modal.classList.remove('show');
+                document.body.classList.remove('modal-open');
+                
+                // Destroy viewer when modal is closed
+                if (viewer) {
+                    viewer.destroy();
+                    viewer = null;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
